@@ -1,0 +1,32 @@
+### Test delayed notification (10 seconds)
+POST https://ntfy.sh/wyf-weather-notity
+Content-Type: application/json
+Delay: 10s
+
+{
+  "city": "Shanghai",
+  "targetHour": 16,
+  "weatherText": "Heavy Rain",
+  "temperature": 20,
+  "weatherCode": "306",
+  "advanceMinutes": 30,
+  "pushMethod": "ntfy",
+  "ntfyTopic": "my-topic"
+}
+
+
+
+### Test immediate notification
+POST https://ntfy.sh/wyf-weather-notity
+Content-Type: application/json
+
+{
+  "city": "武汉",
+  "targetHour": 15,
+  "weatherText": "Light Rain",
+  "temperature": 18,
+  "weatherCode": "305",
+  "advanceMinutes": 60,
+  "pushMethod": "email",
+  "email": "2050781802@qq.com"
+}

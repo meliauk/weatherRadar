@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气提醒配置 - Weather Radar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="number"],
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #e0e0e0;
+        }
+
+        .checkbox-item input {
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd6;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .rule-item {
+            background: #f8f9fa;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .rule-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .config-item {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .config-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .rules-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .rules-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌤️ Weather Radar</h1>
+            <p>智能天气预报提醒系统 - 精准小时级提醒</p>
+        </header>
+
+        <div class="card">
+            <div class="card-title">
+                📋 配置列表
+                <button class="btn btn-primary" onclick="openModal()">+ 新建配置</button>
+            </div>
+            <div id="configList" class="config-list">
+                <div class="loading"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                📖 使用说明
+            </div>
+            <div style="font-size: 0.875rem; line-height: 1.6; color: #555;">
+                <p><strong>系统工作原理：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>每天早晨 4 点，系统自动查询您配置城市的天气预报（5:00 - 23:00）</li>
+                    <li>根据您设置的提醒规则（如"下雨"、"下雪"），匹配对应的天气情况</li>
+                    <li>根据提前提醒时长（默认 60 分钟），计算发送提醒的时间</li>
+                    <li>提醒消息进入队列，到时间后自动推送到您配置的渠道（邮箱/微信/ntfy）</li>
+                </ol>
+                <p style="margin-top: 15px;"><strong>提醒规则示例：</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>"下雨" → 全天有雨都会提醒</li>
+                    <li>"下雨 8-9点" → 只在 8:00-9:00 时段下雨才提醒</li>
+                    <li>"下雪 全天" → 全天有雪都会提醒</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配置模态框 -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">配置天气提醒</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="configForm">
+                <input type="hidden" id="configId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>分组名称</label>
+                        <input type="text" id="groupName" placeholder="如：个人、家庭">
+                    </div>
+                    <div class="form-group">
+                        <label>城市名称 *</label>
+                        <input type="text" id="cityName" required placeholder="如：北京、上海">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>提醒周期</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="1" checked>
+                                <span>周一</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="2" checked>
+                                <span>周二</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="3" checked>
+                                <span>周三</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="4" checked>
+                                <span>周四</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="5" checked>
+                                <span>周五</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="6">
+                                <span>周六</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="reminderDays" value="7">
+                                <span>周日</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>提前提醒时长（分钟）*</label>
+                        <input type="number" id="advanceMinutes" value="60" min="5" max="180" required>
+                        <div class="help-text">默认 60 分钟，即在目标时间前 1 小时发送提醒</div>
+                    </div>
+                    <div class="form-group">
+                        <label>推送方式 *</label>
+                        <select id="pushMethod">
+                            <option value="email">邮箱</option>
+                            <option value="wechat">企业微信机器人</option>
+                            <option value="ntfy">ntfy</option>
+                            <option value="all">全部</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>邮箱地址</label>
+                        <input type="email" id="email" placeholder="your@email.com">
+                        <div class="help-text">选择邮箱或全部推送时需要填写</div>
+                    </div>
+                    <div class="form-group">
+                        <label>企业微信 Webhook</label>
+                        <input type="text" id="wechatWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/...">
+                        <div class="help-text">选择微信或全部推送时需要填写</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ntfy 主题</label>
+                        <input type="text" id="ntfyTopic" placeholder="your-topic">
+                        <div class="help-text">选择 ntfy 或全部推送时需要填写</div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" checked>
+                            启用此配置
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 提醒规则 -->
+                <div class="rules-container">
+                    <div class="rules-title">
+                        <span>📋 提醒规则（可添加多个）</span>
+                        <button type="button" class="btn btn-success btn-sm" onclick="addRule()">+ 添加规则</button>
+                    </div>
+                    <div id="rulesList">
+                        <!-- 规则项将在这里动态添加 -->
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary" style="margin-left: 10px;">保存配置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let configs = [];
+        let groups = [];
+        let rules = [];
+
+        const weatherTypeMap = {
+            'rain': '下雨',
+            'snow': '下雪',
+            'storm': '雷暴',
+            'hot': '高温（≥35°C）',
+            'cold': '低温（≤0°C）'
+        };
+
+        const pushMethodMap = {
+            'email': '邮箱',
+            'wechat': '微信',
+            'ntfy': 'ntfy',
+            'all': '全部'
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGroups();
+            loadConfigs();
+        });
+
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await saveConfig();
+        });
+
+        function openModal(configId = null) {
+            document.getElementById('configModal').classList.add('active');
+            if (configId) {
+                loadConfigToForm(configId);
+            } else {
+                document.getElementById('configForm').reset();
+                document.getElementById('configId').value = '';
+                rules = [];
+                // 默认选中周一到周五
+                document.querySelectorAll('input[name="reminderDays"]').forEach(cb => {
+                    cb.checked = ['1','2','3','4','5'].includes(cb.value);
+                });
+                // 添加默认规则
+                addRule({ weatherType: 'rain', startHour: '', endHour: '' });
+                renderRules();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('configModal').classList.remove('active');
+            document.getElementById('configForm').reset();
+            document.getElementById('configId').value = '';
+            rules = [];
+            renderRules();
+        }
+
+        function addRule(rule = null) {
+            const newRule = rule || {
+                weatherType: 'rain',
+                startHour: '',
+                endHour: ''
+            };
+            rules.push(newRule);
+            renderRules();
+        }
+
+        function removeRule(index) {
+            rules.splice(index, 1);
+            renderRules();
+        }
+
+        function updateRule(index, field, value) {
+            rules[index][field] = value;
+        }
+
+        function renderRules() {
+            const container = document.getElementById('rulesList');
+            if (rules.length === 0) {
+                container.innerHTML = '<p style="color: #6b7280; text-align: center;">暂无规则，点击上方按钮添加</p>';
+                return;
+            }
+
+            container.innerHTML = rules.map((rule, index) => `
+                <div class="rule-item">
+                    <div class="rule-header">
+                        <span class="rule-title">规则 ${index + 1}</span>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRule(${index})">删除</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>天气类型</label>
+                            <select onchange="updateRule(${index}, 'weatherType', this.value)">
+                                <option value="rain" ${rule.weatherType === 'rain' ? 'selected' : ''}>下雨</option>
+                                <option value="snow" ${rule.weatherType === 'snow' ? 'selected' : ''}>下雪</option>
+                                <option value="storm" ${rule.weatherType === 'storm' ? 'selected' : ''}>雷暴</option>
+                                <option value="hot" ${rule.weatherType === 'hot' ? 'selected' : ''}>高温（≥35°C）</option>
+                                <option value="cold" ${rule.weatherType === 'cold' ? 'selected' : ''}>低温（≤0°C）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>开始时间（小时）</label>
+                            <input type="number" min="5" max="23" placeholder="如：8"
+                                value="${rule.startHour || ''}"
+                                onchange="updateRule(${index}, 'startHour', this.value)">
+                            <div class="help-text">留空表示全天</div>
+                        </div>
+                        <div class="form-group">
+                            <label>结束时间（小时）</label>
+                            <input type="number" min="5" max="23" placeholder="如：9"
+                                value="${rule.endHour || ''}"
+                                onchange="updateRule(${index}, 'endHour', this.value)">
+                            <div class="help-text">留空表示全天</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadGroups() {
+            try {
+                const res = await fetch('/api/groups');
+                groups = await res.json();
+            } catch (e) {
+                console.error('加载分组失败:', e);
+            }
+        }
+
+        async function loadConfigs() {
+            try {
+                const res = await fetch('/api/configs');
+                configs = await res.json();
+                renderConfigList();
+            } catch (e) {
+                console.error('加载配置失败:', e);
+                document.getElementById('configList').innerHTML = '<p style="color: #ef4444;">加载配置失败</p>';
+            }
+        }
+
+        function renderConfigList() {
+            const container = document.getElementById('configList');
+            if (configs.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center;">暂无配置，点击上方按钮创建</p>';
+                return;
+            }
+
+            container.innerHTML = configs.map(config => `
+                <div class="config-item">
+                    <div class="config-header">
+                        <div>
+                            <span class="config-title">${config.city_name}</span>
+                            <span class="status-badge ${config.is_active ? 'status-active' : 'status-inactive'}">
+                                ${config.is_active ? '已启用' : '已停用'}
+                            </span>
+                        </div>
+                        <div class="config-actions">
+                            <button class="btn btn-primary btn-sm" onclick="openModal(${config.id})">编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteConfig(${config.id})">删除</button>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.875rem; color: #666;">
+                        <div>📍 分组: ${config.group_name || '默认分组'}</div>
+                        <div>📅 周期: ${formatDays(config.reminder_days)}</div>
+                        <div>⏰ 提前: ${config.advance_minutes}分钟</div>
+                        <div>📨 推送: ${pushMethodMap[config.push_method]}</div>
+                    </div>
+                    ${config.rules && config.rules.length > 0 ? `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5e5;">
+                            <div style="font-size: 0.75rem; color: #999; margin-bottom: 5px;">提醒规则:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                ${config.rules.map(rule => `
+                                    <span style="background: #f0f9ff; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">
+                                        ${weatherTypeMap[rule.weather_type]}${rule.start_hour !== null ? ` ${rule.start_hour}-${rule.end_hour}点` : ' 全天'}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function formatDays(days) {
+            const dayMap = { '1': '一', '2': '二', '3': '三', '4': '四', '5': '五', '6': '六', '7': '日' };
+            return days.split(',').map(d => '周' + dayMap[d]).join(' ');
+        }
+
+        function loadConfigToForm(configId) {
+            const config = configs.find(c => c.id === configId);
+            if (!config) return;
+
+            document.getElementById('configId').value = config.id;
+            document.getElementById('groupName').value = config.group_name || '';
+            document.getElementById('cityName').value = config.city_name;
+            document.getElementById('advanceMinutes').value = config.advance_minutes;
+            document.getElementById('pushMethod').value = config.push_method;
+            document.getElementById('email').value = config.email || '';
+            document.getElementById('wechatWebhook').value = config.wechat_webhook || '';
+            document.getElementById('ntfyTopic').value = config.ntfy_topic || '';
+            document.getElementById('isActive').checked = config.is_active === 1;
+
+            const days = config.reminder_days.split(',');
+            document.querySelectorAll('input[name="reminderDays"]').forEach(cb => {
+                cb.checked = days.includes(cb.value);
+            });
+
+            // 加载规则
+            rules = (config.rules || []).map(r => ({
+                weatherType: r.weather_type,
+                startHour: r.start_hour || '',
+                endHour: r.end_hour || ''
+            }));
+            renderRules();
+        }
+
+        async function saveConfig() {
+            const configId = document.getElementById('configId').value;
+            
+            const days = Array.from(document.querySelectorAll('input[name="reminderDays"]:checked'))
+                .map(cb => cb.value)
+                .join(',');
+
+            if (rules.length === 0) {
+                alert('请至少添加一条提醒规则');
+                return;
+            }
+
+            const data = {
+                groupName: document.getElementById('groupName').value,
+                cityName: document.getElementById('cityName').value,
+                reminderDays: days,
+                advanceMinutes: parseInt(document.getElementById('advanceMinutes').value),
+                rules: rules.map(r => ({
+                    weatherType: r.weatherType,
+                    startHour: r.startHour ? parseInt(r.startHour) : null,
+                    endHour: r.endHour ? parseInt(r.endHour) : null
+                })),
+                pushMethod: document.getElementById('pushMethod').value,
+                email: document.getElementById('email').value,
+                wechatWebhook: document.getElementById('wechatWebhook').value,
+                ntfyTopic: document.getElementById('ntfyTopic').value,
+                isActive: document.getElementById('isActive').checked ? 1 : 0
+            };
+
+            try {
+                const url = configId ? `/api/configs/${configId}` : '/api/configs';
+                const method = configId ? 'PUT' : 'POST';
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadConfigs();
+                    alert('保存成功');
+                } else {
+                    const err = await res.json();
+                    alert('保存失败: ' + (err.message || '未知错误'));
+                }
+            } catch (e) {
+                alert('保存失败: ' + e.message);
+            }
+        }
+
+        async function deleteConfig(configId) {
+            if (!confirm('确定要删除这个配置吗？')) return;
+
+            try {
+                const res = await fetch(`/api/configs/${configId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadConfigs();
+                    alert('删除成功');
+                } else {
+                    alert('删除失败');
+                }
+            } catch (e) {
+                alert('删除失败: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
