@@ -3,7 +3,7 @@ name: Weather Radar Cron
 on:
   # 早晨4点执行天气分析和任务生成
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '0 20 * * *'  # UTC 20:00 = 北京时间次日 04:00
   # 允许手动触发
   workflow_dispatch:
 
