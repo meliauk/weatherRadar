@@ -10,6 +10,7 @@ dist/
 
 # Environment variables
 .env
+test.http
 .env.local
 .env.*.local
 local.env
