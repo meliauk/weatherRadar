@@ -99,7 +99,7 @@ export async function get24HourForecast(cityName: string): Promise<HourlyForecas
       }
     });
 
-    console.log(`[${geoRes}][${cityName}] 获取24小时预报成功: `,JSON.stringify(res.data.hourly));
+    // console.log(`[${cityName}] 获取24小时预报成功: `,JSON.stringify(res.data.hourly));
 
     const hourly = res.data.hourly;
 

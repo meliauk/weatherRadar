@@ -75,9 +75,9 @@ export async function analyzeWeatherAndSchedule(): Promise<void> {
           }
 
           // 检查天气类型匹配
-          console.log(`[${config.city_name}][调试] hour=${forecast.hour}, weatherCode="${forecast.weatherCode}"(类型:${typeof forecast.weatherCode}), weatherText="${forecast.weatherText}", 规则类型=${rule.weather_type}`);
+          // console.log(`[${config.city_name}][调试] hour=${forecast.hour}, weatherCode="${forecast.weatherCode}"(类型:${typeof forecast.weatherCode}), weatherText="${forecast.weatherText}", 规则类型=${rule.weather_type}`);
           const isMatch = checkWeatherType(forecast.weatherCode, rule.weather_type, forecast.temperature);
-          console.log(`[${config.city_name}][调试] checkWeatherType 结果: ${isMatch}`);
+          // console.log(`[${config.city_name}][调试] checkWeatherType 结果: ${isMatch}`);
           if (isMatch) {
             matchedRules.push({
               rule,
