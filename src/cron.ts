@@ -14,19 +14,8 @@ async function main() {
 
   console.log('天气提醒定时任务已启动,执行一次');
   await analyzeWeatherAndSchedule();
-
-  // 早晨4点执行天气分析和任务生成
-  cron.schedule('0 4 * * *', async () => {
-    console.log('[' + new Date().toISOString() + '] 执行早晨4点天气分析...');
-    await analyzeWeatherAndSchedule();
-  });
-
-  // 调试：立即执行一次
-  if (process.argv.includes('--run-now')) {
-    console.log('立即执行一次...');
-    await analyzeWeatherAndSchedule();
-  }
-
+  console.log('任务执行完成，退出程序');
+  process.exit(0);
 }
 
 main();

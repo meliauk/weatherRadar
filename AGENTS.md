@@ -39,3 +39,27 @@
   - 需配置GitHub Secrets后测试完整流程
 
 - **AI 指令记录**："/handoff 模块名 weather"
+
+---
+
+### 2026-05-06 - 完成部署配置与路由修复
+
+- **修改文件**：
+  - `src/services/weather.ts`（修复24小时预报日期过滤，只返回今天数据）
+  - `src/services/cron.ts`（修复时间显示为本地时间，添加调试日志）
+  - `src/index.ts`（添加 `/weather` 路由前缀，支持 `/weather/` 访问首页）
+  - `src/public/index.html`（所有 fetch 路径添加 `/weather` 前缀）
+  - `src/routes/api.ts`（API 路由保持 `/groups`, `/configs` 等）
+
+- **关键决策**：
+  - Nginx 配置使用 `proxy_pass http://127.0.0.1:9888;`（无斜杠后缀），保留完整 `/weather` 路径转发到后端
+  - 后端 Express 使用 `/weather/api` 路由前缀，匹配 Nginx 转发路径
+  - 前端所有 API 请求使用 `/weather/api/xxx` 路径
+  - 首页路由支持 `/weather`, `/weather/`, `/weather/index.html` 三种访问方式
+
+- **部署地址**：`https://oci.v0710.top/weather/`
+
+- **AI 指令记录**：
+  - "帮我提交下代码，.env文件不要提交"
+  - "帮我修改下fetch"
+  - "用方案 1"

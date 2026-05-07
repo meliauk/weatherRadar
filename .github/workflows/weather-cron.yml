@@ -46,7 +46,7 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           NTFY_URL: ${{ secrets.NTFY_URL }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: npm run cron -- --run-now
+        run: npm run cron
 
   # 持续监听 ntfy 消息并推送（需要单独部署，这里只是示例）
   # 实际使用时，建议使用 Railway/Render 等平台的常驻服务
