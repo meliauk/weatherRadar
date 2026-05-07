@@ -93,27 +93,18 @@ export async function analyzeWeatherAndSchedule(): Promise<void> {
       for (const matched of matchedRules) {
         // 计算计划发送时间
         const scheduledTime = calculateScheduledTime(matched.hour, config.advance_minutes);
-        
-        // 检查是否已存在相同的任务
-        const existingTasks = await Repository.getUnsentTasks();
-        const duplicate = existingTasks.find(t => 
-          t.config_id === config.id && 
-          t.target_hour === matched.hour &&
-          new Date(t.scheduled_time).getTime() === scheduledTime.getTime()
-        );
-
-        if (duplicate) {
-          console.log(`[${config.city_name}] 任务已存在，跳过: ${matched.hour}:00`);
-          continue;
-        }
-
-        // 发送消息到 ntfy
-        const message = formatNtfyMessage(config, matched, scheduledTime);
-        const ntfyId = await sendToNtfy(message, scheduledTime);
-
-        // 创建任务记录
         const scheduledTimeStr = formatLocalDateTime(scheduledTime);
-        const taskId = await Repository.createTask({
+
+        // 生成唯一的去重 Tag（基于配置ID+目标小时+日期）
+        const dateStr = new Date().toISOString().split('T')[0];
+        const uniqueTag = `weather-${config.id}-${matched.hour}-${dateStr}`;
+
+        // 发送消息到 ntfy（使用 Tag 去重，ntfy 会自动丢弃相同 Tag 的重复消息）
+        const message = formatNtfyMessage(config, matched, scheduledTime);
+        const ntfyId = await sendToNtfy(message, scheduledTime, uniqueTag);
+
+        // 异步创建任务记录（不阻塞主流程，仅作为审计日志）
+        Repository.createTask({
           config_id: config.id!,
           rule_id: matched.rule.id!,
           city_name: config.city_name,
@@ -123,9 +114,9 @@ export async function analyzeWeatherAndSchedule(): Promise<void> {
           scheduled_time: scheduledTimeStr,
           ntfy_message_id: ntfyId,
           is_sent: 0
-        });
+        }).catch(err => console.error('创建任务记录失败:', err));
 
-        console.log(`[${config.city_name}] 创建任务成功: ID=${taskId}, 目标时间=${matched.hour}:00, 发送时间=${scheduledTimeStr}`);
+        console.log(`[${config.city_name}] 创建任务成功: 目标时间=${matched.hour}:00, 发送时间=${scheduledTimeStr}, Tag=${uniqueTag}`);
       }
 
     } catch (error) {
@@ -186,24 +177,26 @@ function formatNtfyMessage(config: Config, matched: MatchedRule, scheduledTime: 
   });
 }
 
-async function sendToNtfy(message: string, scheduledTime: Date): Promise<string> {
+async function sendToNtfy(message: string, scheduledTime: Date, uniqueTag: string): Promise<string> {
   try {
-    const ntfyId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 使用 uniqueTag 作为 ntfy 的 Id，实现自动去重
+    // ntfy 会丢弃具有相同 Id 的重复消息
+    const ntfyId = uniqueTag;
     const url = `${NTFY_URL}/${NTFY_TOPIC}`;
-    
+
     // 计算延迟（秒）
     const now = new Date();
     const delaySeconds = Math.max(0, Math.floor((scheduledTime.getTime() - now.getTime()) / 1000));
-    
+
     await axios.post(url, message, {
       headers: {
         'Id': ntfyId,
         'Delay': `${delaySeconds}s`,
         'Priority': 'high',
-        'Tags': 'warning,cloud'
+        'Tags': `warning,cloud,${uniqueTag}`
       }
     });
-    
+
     console.log(`消息已发送到 ntfy: ${ntfyId}, 延迟: ${delaySeconds}秒`);
     return ntfyId;
   } catch (error) {
