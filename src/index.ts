@@ -13,10 +13,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api', apiRouter);
+app.use('/weather/api', apiRouter);
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get(['/weather', '/weather/', '/weather/index.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 async function main() {
@@ -29,7 +29,7 @@ async function main() {
   await initDatabase();
 
   app.listen(PORT, () => {
-    console.log(`服务器运行在 http://localhost:${PORT}`);
+    console.log(`服务器运行在 http://localhost:${PORT}/weather`);
   });
 }
 

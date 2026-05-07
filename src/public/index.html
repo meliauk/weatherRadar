@@ -620,7 +620,7 @@
 
         async function loadGroups() {
             try {
-                const res = await fetch('/api/groups');
+                const res = await fetch('/weather/api/groups');
                 groups = await res.json();
             } catch (e) {
                 console.error('加载分组失败:', e);
@@ -629,7 +629,7 @@
 
         async function loadConfigs() {
             try {
-                const res = await fetch('/api/configs');
+                const res = await fetch('/weather/api/configs');
                 configs = await res.json();
                 renderConfigList();
             } catch (e) {
@@ -744,9 +744,9 @@
             };
 
             try {
-                const url = configId ? `/api/configs/${configId}` : '/api/configs';
+                const url = configId ? `/weather/api/configs/${configId}` : '/weather/api/configs';
                 const method = configId ? 'PUT' : 'POST';
-                
+
                 const res = await fetch(url, {
                     method,
                     headers: { 'Content-Type': 'application/json' },
@@ -770,7 +770,7 @@
             if (!confirm('确定要删除这个配置吗？')) return;
 
             try {
-                const res = await fetch(`/api/configs/${configId}`, { method: 'DELETE' });
+                const res = await fetch(`/weather/api/configs/${configId}`, { method: 'DELETE' });
                 if (res.ok) {
                     loadConfigs();
                     alert('删除成功');
