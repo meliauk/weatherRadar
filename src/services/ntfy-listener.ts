@@ -154,12 +154,35 @@ async function processMessage(message: NtfyMessage): Promise<void> {
                 if (task) {
                     await Repository.markTaskAsSent(task.id!, message.id);
                 }
+
+                // 成功处理，退出循环
+                return;
             } else {
                 console.error(`通知发送失败: ${data.city} ${data.targetHour}:00`);
+                retryCount++;
+
+                // 超过最大重试次数，退出
+                if (retryCount >= maxRetries) {
+                    console.error(`达到最大重试次数，放弃处理: ${data.city} ${data.targetHour}:00`);
+                    return;
+                }
+
+                // 等待后重试
+                await new Promise(resolve => setTimeout(resolve, 5000));
             }
 
         } catch (error) {
             console.error('处理消息失败:', error);
+            retryCount++;
+
+            // 超过最大重试次数，退出
+            if (retryCount >= maxRetries) {
+                console.error(`达到最大重试次数，放弃处理: ${message.id}`);
+                return;
+            }
+
+            // 等待后重试
+            await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
 }
