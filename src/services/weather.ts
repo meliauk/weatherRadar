@@ -107,6 +107,8 @@ export async function get24HourForecast(cityName: string): Promise<HourlyForecas
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+    console.log(`获取今天的日期: `,todayStr);
+
     return hourly
       .filter((h: any) => {
         // 只保留今天的预报数据

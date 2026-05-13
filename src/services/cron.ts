@@ -37,6 +37,9 @@ export async function analyzeWeatherAndSchedule(): Promise<void> {
       
       // 获取24小时预报
       const forecasts = await get24HourForecast(config.city_name);
+
+      console.log(`[${config.city_name}] 获取24小时预报成功: `, forecasts);
+      console.log("=======================================")
       
       // 保存小时级天气数据（5-23点）
       for (const forecast of forecasts) {
