@@ -1,17 +1,17 @@
 ### Test delayed notification (10 seconds)
 POST https://ntfy.sh/wyf-weather-notity
 Content-Type: application/json
-Delay: 10s
+Delay: 50s
 
 {
-  "city": "Shanghai",
-  "targetHour": 16,
+  "city": "武汉",
+  "targetHour": 18,
   "weatherText": "Heavy Rain",
   "temperature": 20,
   "weatherCode": "306",
   "advanceMinutes": 30,
-  "pushMethod": "ntfy",
-  "ntfyTopic": "my-topic"
+  "pushMethod": "email",
+  "email": "2050781802@qq.com"
 }
 
 

@@ -226,6 +226,14 @@ export class Repository {
     return (rows as ReminderTask[])[0] || null;
   }
 
+  static async getTaskByUniqueTag(uniqueTag: string): Promise<ReminderTask | null> {
+    const [rows] = await pool.query(
+      'SELECT * FROM reminder_tasks WHERE ntfy_message_id = ?',
+      [uniqueTag]
+    );
+    return (rows as ReminderTask[])[0] || null;
+  }
+
   static async markTaskAsSent(taskId: number, ntfyId?: string): Promise<void> {
     await pool.query(
       `UPDATE reminder_tasks 

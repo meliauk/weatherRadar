@@ -59,7 +59,7 @@ export async function startNtfyListener(): Promise<void> {
 
             // 只处理 message 类型的事件
             if (message.event === 'message') {
-              console.log(`收到消息: ${message.id}`);
+              console.log(`收到消息: ${message}`);
               await processMessage(message);
             }
           } catch (e) {
@@ -109,10 +109,16 @@ async function processMessage(message: NtfyMessage): Promise<void> {
 
             console.log(`处理消息: ${data.city} ${data.targetHour}:00`);
 
-            // 查找对应的任务
-            const task = await Repository.getTaskByNtfyId(message.id);
+            // 从 tags 中提取 uniqueTag（格式为 weather-{configId}-{hour}-{date}）
+            const uniqueTag = message.tags?.find(tag => tag.startsWith('weather-'));
+            console.log(`消息 tags: ${message.tags?.join(', ')}, 提取 uniqueTag: ${uniqueTag}`);
+
+            // 查找对应的任务（优先使用 uniqueTag，如果不存在则使用 message.id）
+            const task = uniqueTag
+                ? await Repository.getTaskByUniqueTag(uniqueTag)
+                : await Repository.getTaskByNtfyId(message.id);
             if (!task) {
-                console.log(`未找到对应的任务记录: ${message.id}`);
+                console.log(`未找到对应的任务记录: uniqueTag=${uniqueTag}, message.id=${message.id}`);
             }
 
             // 发送通知
@@ -152,7 +158,7 @@ async function processMessage(message: NtfyMessage): Promise<void> {
 
                 // 更新任务状态
                 if (task) {
-                    await Repository.markTaskAsSent(task.id!, message.id);
+                    await Repository.markTaskAsSent(task.id!, uniqueTag || message.id);
                 }
 
                 // 成功处理，退出循环
