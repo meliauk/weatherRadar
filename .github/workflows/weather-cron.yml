@@ -11,7 +11,8 @@ jobs:
   analyze-weather:
     runs-on: ubuntu-latest
     environment: production
-
+    env:
+      TZ: Asia/Shanghai  # 添加这一行，设置时区为北京时间
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
