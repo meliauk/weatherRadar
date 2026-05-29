@@ -161,6 +161,14 @@ export class Repository {
     return (result as any).insertId;
   }
 
+  static async getRuleById(id: number): Promise<ReminderRule | null> {
+    const [rows] = await pool.query(
+      'SELECT * FROM reminder_rules WHERE id = ?',
+      [id]
+    );
+    return (rows as ReminderRule[])[0] || null;
+  }
+
   static async getRulesByConfigId(configId: number): Promise<ReminderRule[]> {
     const [rows] = await pool.query(
       'SELECT * FROM reminder_rules WHERE config_id = ? AND is_active = 1',

@@ -63,3 +63,23 @@
   - "帮我提交下代码，.env文件不要提交"
   - "帮我修改下fetch"
   - "用方案 1"
+
+---
+
+### 2026-05-13 - 修复 ntfy 消息 ID 不匹配问题
+
+- **修改文件**：
+  - `src/db/repository.ts`（新增 `getTaskByUniqueTag` 方法，支持按 uniqueTag 查询任务）
+  - `src/services/ntfy-listener.ts`（processMessage 从 `message.tags` 提取 uniqueTag 查询数据库，替代错误的 `message.id` 查询）
+
+- **关键决策**：
+  - 根本原因：`cron.ts` 发送到 ntfy 时使用 `weather-{configId}-{hour}-{date}` 作为 Header `Id` 和 `ntfy_message_id`，但 ntfy 返回消息时 `message.id` 是 ntfy 内部生成的随机 ID（如 `ZH0z8goPAx62`），导致查询失败
+  - 修复方案：使用 `message.tags` 中携带的 `weather-*` tag 提取 uniqueTag，与数据库 `ntfy_message_id` 匹配
+
+- **未完成**：
+  - 无
+
+- **AI 指令记录**：
+  - "阅读一下 `processMessage` 方法，处理ntfy消息成功后，需要删除ntfy里面的消息嘛"
+  - "日志打印的是 未找到对应的任务记录: ZH0z8goPAx62"
+  - "用方案 2"

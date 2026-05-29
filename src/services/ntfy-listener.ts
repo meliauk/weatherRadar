@@ -1,6 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { pushNotification } from './push';
+import { get24HourForecast, checkWeatherType } from './weather';
 import { Repository } from '../db/repository';
 
 dotenv.config();
@@ -117,7 +118,45 @@ async function processMessage(message: NtfyMessage): Promise<void> {
             const task = uniqueTag
                 ? await Repository.getTaskByUniqueTag(uniqueTag)
                 : await Repository.getTaskByNtfyId(message.id);
-            if (!task) {
+
+            if (task) {
+                // 实时查询天气，检查是否仍然满足规则条件
+                const rule = await Repository.getRuleById(task.rule_id);
+                if (rule) {
+                    try {
+                        const forecasts = await get24HourForecast(data.city);
+                        const forecastForTarget = forecasts.find(f => f.hour === data.targetHour);
+                        if (forecastForTarget) {
+                            const isMatch = checkWeatherType(
+                                forecastForTarget.weatherCode,
+                                rule.weather_type,
+                                forecastForTarget.temperature
+                            );
+                            if (!isMatch) {
+                                console.log(`[${data.city}] 天气已变化，不再满足规则(${rule.weather_type}): targetHour=${data.targetHour}:00, 原天气=${data.weatherText}, 实时预报=${forecastForTarget.weatherText}`);
+                                // 删除 ntfy 中的消息，避免后续重复消费
+                                try {
+                                    await axios.delete(`${NTFY_URL}/${NTFY_TOPIC}/${message.id}`);
+                                    console.log(`已删除 ntfy 消息: ${message.id}`);
+                                } catch (_) {
+                                    // ntfy 删除失败不影响主流程
+                                    console.error(`删除 ntfy 消息失败: ${message.id}`);
+                                }
+                                // 标记任务已处理
+                                await Repository.markTaskAsSent(task.id!, uniqueTag || message.id);
+                                return;
+                            }
+                            console.log(`[${data.city}] 实时天气验证通过: ${forecastForTarget.weatherText}, 继续发送通知`);
+                        } else {
+                            console.log(`[${data.city}] 未找到 targetHour=${data.targetHour} 的实时预报，继续发送通知`);
+                        }
+                    } catch (weatherErr) {
+                        console.error(`[${data.city}] 获取实时天气失败，继续发送通知:`, weatherErr);
+                    }
+                } else {
+                    console.log(`未找到规则 rule_id=${task.rule_id}，继续发送通知`);
+                }
+            } else {
                 console.log(`未找到对应的任务记录: uniqueTag=${uniqueTag}, message.id=${message.id}`);
             }
 
