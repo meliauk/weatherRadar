@@ -1,7 +1,7 @@
 import axios from 'axios';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { WeatherData } from './weather';
+import { WeatherData, checkHasPrecipitation } from './weather';
 
 dotenv.config();
 
@@ -26,6 +26,7 @@ interface PushMessage {
   weather: WeatherData;
   reason: string;
   timeSlot: 'morning' | 'evening';
+  targetHour?: number;
   customMessage?: string;
 }
 
@@ -52,7 +53,11 @@ function buildMessageContent(message: PushMessage): string {
 // 发送邮件
 export async function sendEmail(to: string, message: PushMessage): Promise<boolean> {
   try {
-    const subject = `${message.cityName}天气提醒 - ${getTimeSlotText(message.timeSlot)}`;
+    const targetTime = message.targetHour 
+      ? `${message.targetHour.toString().padStart(2, '0')}:00` 
+      : getTimeSlotText(message.timeSlot);
+    const suffix = checkHasPrecipitation(message.weather.weatherCode) ? '带伞' : '';
+    const subject = `${message.cityName} ${targetTime} ${message.weather.weatherText} ${suffix}`;
     const content = buildMessageContent(message);
 
     await emailTransporter.sendMail({

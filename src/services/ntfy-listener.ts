@@ -184,6 +184,7 @@ async function processMessage(message: NtfyMessage): Promise<void> {
                     },
                     reason: `${data.weatherText} (${targetTime})`,
                     timeSlot: 'morning',
+                    targetHour: data.targetHour,
                     customMessage: `🌤️ ${data.city} 天气提醒\n\n` +
                         `⏰ 目标时间: ${targetTime}\n` +
                         `🌡️ 温度: ${data.temperature}°C\n` +

@@ -134,7 +134,7 @@ export async function get24HourForecast(cityName: string): Promise<HourlyForecas
   }
 }
 
-function checkHasPrecipitation(weatherCode: string): boolean {
+export function checkHasPrecipitation(weatherCode: string): boolean {
   const rainCodes = ['300', '301', '302', '303', '304', '305', '306', '307', '308', '309', '310', '311', '312', '313', '314', '315', '316', '317', '318', '350', '351', '399'];
   const snowCodes = ['400', '401', '402', '403', '404', '405', '406', '407', '408', '409', '410', '456', '457', '499'];
 
