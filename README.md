@@ -157,6 +157,9 @@ npm install -g pm2
 pm2 start npm --name weather-listener -- run listener   # 消费 ntfy 消息并推送（必须）
 pm2 start npm --name weather-web      -- start          # Web 配置页（建议；首次启动自动建表）
 pm2 save && pm2 startup  # 保存开启自启
+
+更新了应用代码	重启应用后（pm2 restart my-app），需要再次执行 pm2 save，否则重启后 PM2 跑的依然是旧版本代码。
+
 ```
 
 - 浏览器打开 `http://你的域名或IP:PORT/weather`（见第 2 步 PORT）添加城市、规则、推送渠道；
